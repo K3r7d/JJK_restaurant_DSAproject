@@ -18,15 +18,13 @@ class Restaurant {
 		virtual void UNLIMITED_VOID() = 0;
 		virtual void DOMAIN_EXPANSION() = 0;	
 		virtual void LIGHT(int num) = 0;
-
 		public:
 			class customer {
-			private:	
+			public:	
 				string name;
 				int energy;
 				customer* prev;
 				customer* next;
-				friend class Restaurant;
 			public:
 				customer(){}
 				customer(string na, int e, customer* p, customer *ne): name(na), energy(e), prev(p), next(ne){}
