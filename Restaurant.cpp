@@ -47,14 +47,60 @@ class imp_res : public Restaurant
             }
             void print(){
                 customer* temp = head;
+                cout<<"[ ";
+                cout<<"head-> ";
                 while(temp != nullptr){
-                    temp->print();
+                    cout<<temp->name<<":"<<temp->energy<<" -> ";
                     temp = temp->next;
                 }
+                cout<<"tail ]"<<endl;
             }
             int getSize() const{
                 return size;
             }
+            customer* getHead() const{
+                return head;
+            }
+            int sumAllEnergy(bool positive){
+                customer* temp = head;
+                int sum = 0;
+                while(temp != nullptr){
+                    if(positive){
+                        if(temp->energy > 0){
+                            sum += temp->energy;
+                        }
+                    }
+                    else{
+                        if(temp->energy < 0){
+                            sum += temp->energy;
+                        }
+                    }
+                    temp = temp->next;
+                }
+                return sum;
+            }
+            void removeAll(bool positive){
+                customer* temp = head;
+                while(temp != nullptr){
+                    if(positive){
+                        if(temp->energy > 0){
+                            customer* temp2 = dequeue();
+                            cout<<"Remove "<<temp2->name<<endl;
+                            delete temp2;
+                        }
+                    }
+                    else{
+                        if(temp->energy < 0){
+                            customer* temp2 = dequeue();
+                            cout<<"Remove "<<temp2->name<<endl;
+                            delete temp2;
+                        }
+                    }
+                    temp = temp->next;
+                }
+            }
+            
+
     };
     private:
         customer* head;
@@ -77,6 +123,16 @@ class imp_res : public Restaurant
             X->next = cus;
             size++;
         }
+        void changeX(string name){
+            customer* temp = head->next;
+            for(int i = 0; i < size; i++){
+                if(temp->name == name){
+                    X = temp;
+                    return;
+                }
+                temp = temp->next;
+            }
+        }
 
         void addPrev(customer* cus) {
             cus->prev = X->prev;
@@ -95,6 +151,12 @@ class imp_res : public Restaurant
             else {
                 for (int i = 0; i < size; i++) {
                     if (temp->name == name) {
+                        if(temp == head->next){
+                            head->next = temp->next;
+                        }
+                        if(temp == X){
+                            X = nullptr;
+                        }
                         temp->prev->next = temp->next;
                         temp->next->prev = temp->prev;
                         temp->next = nullptr;
@@ -108,30 +170,6 @@ class imp_res : public Restaurant
             }
         }
 
-
-        void remove(customer* c) {
-            customer* temp = X;
-            if (head->next == nullptr) {
-                return; // List is empty
-            }
-            else {
-                temp = temp->next;
-                while (temp != X) {
-                    if (temp == c) {
-                        // Adjust pointers to skip the 'temp' node
-                        temp->prev->next = temp->next;
-                        temp->next->prev = temp->prev;
-                        temp->next = nullptr;
-                        temp->prev = nullptr;
-                        // Delete the 'temp' node to free memory
-                        delete temp;
-                        size--;
-                        return;
-                    }
-                    temp = temp->next;
-                }
-            }
-        }
 
         bool isEmpty(){
             return size == 0;
@@ -150,6 +188,8 @@ class imp_res : public Restaurant
             }
             return false;
         }
+
+        
 
         void RED(string name, int energy){
             customer* c = new customer(name, energy,nullptr,nullptr);
@@ -207,6 +247,9 @@ class imp_res : public Restaurant
             for(int i = 0; i<size;i++){
                 customer* temp = eating.dequeue();
                 removebyname(temp->name);
+                if(X ==nullptr){
+                    changeX(eating.getHead()->name);
+                }
             }
             for(int i = 0; i < waiting.getSize();i++){
                 customer* temp = waiting.dequeue();
@@ -220,28 +263,61 @@ class imp_res : public Restaurant
 		
 		void UNLIMITED_VOID(){};
 		
-		void DOMAIN_EXPANSION(){};
+		void DOMAIN_EXPANSION(){
+            if (isEmpty()) return;
+            int soccerer = eating.sumAllEnergy(true) + waiting.sumAllEnergy(true);
+            int curse = eating.sumAllEnergy(false) + waiting.sumAllEnergy(false);
+            if(soccerer >= abs(curse)){
+                eating.removeAll(false);
+                waiting.removeAll(false);
+                for(int i = 0;i<size;i++){
+                    customer* temp = head->next;
+                    if(temp->energy < 0){
+                        removebyname(temp->name);
+                    }
+                    temp = temp->next;
+                }
+                if(X == nullptr){
+                    changeX(eating.getHead()->name);
+                }
+            }
+            else{
+                eating.removeAll(true);
+                waiting.removeAll(true);
+                for(int i = 0;i<size;i++){
+                    customer* temp = head->next;
+                    if(temp->energy > 0){
+                        removebyname(temp->name);
+                    }
+                    temp = temp->next;
+                }
+                if(X == nullptr){
+                    changeX(eating.getHead()->name);
+                }
+            }
+        };
 		
 		void LIGHT(int num) {
             if (isEmpty()) return;
-            // customer* temp = X;
-            // if (num > 0) {
-            //     for (int i = 0; i < num; i++) {
-            //         temp->print();
-            //         temp = temp->next;
-            //     }
-            // }
-            // else {
-            //     for (int i = 0; i < -num; i++) {
-            //         temp = temp->prev;
-            //         temp->print();
-            //     }
-            // }
+            customer* temp = X;
+            if (num > 0) {
+                for (int i = 0; i < size; i++) {
+                    temp->print();
+                    temp = temp->next;
+                }
+            }
+            else {
+                for (int i = 0; i < size; i++) {
+                    temp = temp->prev;
+                    temp->print();
+                }
+            }
             cout<<"------------------------"<<endl;
-            cout<<"Eating Queue: "<<endl;
+            cout<<"Eating Queue: ";
             eating.print();
+            cout<<"X: "<<X->name<<endl;
             cout<<"------------------------"<<endl;
-            cout<<"Waiting Queue: "<<endl;
+            cout<<"Waiting Queue: ";
             waiting.print();
         }
 
