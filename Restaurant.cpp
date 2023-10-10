@@ -3,7 +3,6 @@
 extern int MAXSIZE;
 
 
-
 class imp_res : public Restaurant
 {
     class Queue{
@@ -77,26 +76,64 @@ class imp_res : public Restaurant
                     }
                     temp = temp->next;
                 }
+                delete temp;
                 return sum;
             }
+
+            void removebyname(string name) {
+            customer* temp = head;
+            if (head == nullptr) {
+                return;
+            }
+            else {
+                for (int i = 0; i < size; i++) {
+                    if (temp->name == name) {
+                        if(temp == head){
+                            head = temp->next;
+
+
+                        }
+                        if(temp == tail){
+                            tail = temp->prev;
+                        }
+                        if(temp->next != nullptr){
+                            temp->next->prev = temp->prev;
+                        }
+                        if(temp->prev != nullptr){
+                            temp->prev->next = temp->next;
+                        }
+                        temp->next = nullptr;
+                        temp->prev = nullptr;
+                        delete temp;
+                        size--;
+                        return;
+                    }
+                    temp = temp->next;
+                }
+            }
+        }
+            
+
             void removeAll(bool positive){
+                if(head == nullptr) return;
                 customer* temp = head;
-                while(temp != nullptr){
+                for(int i = 0;i<size;i++){
                     if(positive){
                         if(temp->energy > 0){
-                            customer* temp2 = dequeue();
-                            cout<<"Remove "<<temp2->name<<endl;
-                            delete temp2;
+                            cout<<"Remove "<<temp->name<<endl;
+                            string name = temp->name;
+                            temp = temp->next;
+                            removebyname(name);
                         }
                     }
                     else{
                         if(temp->energy < 0){
-                            customer* temp2 = dequeue();
-                            cout<<"Remove "<<temp2->name<<endl;
-                            delete temp2;
+                            cout<<"Remove "<<temp->name<<endl;
+                            string name = temp->name;
+                            temp = temp->next;
+                            removebyname(name);
                         }
                     }
-                    temp = temp->next;
                 }
             }
             
@@ -212,7 +249,7 @@ class imp_res : public Restaurant
                 int max = INT32_MIN;
                 int max_index = 0;
                 for(int i = 0;i<size;i++){
-                    int RES = abs(abs(temp->energy)-abs(c->energy));
+                    int RES = abs(temp->energy-c->energy);
                     if(RES>max){
                         max = RES;
                         max_index = i;
@@ -223,7 +260,7 @@ class imp_res : public Restaurant
                 for(int i = 0;i<max_index;i++){
                     temp = temp->next;
                 }
-                int RES  = abs(temp->energy)-abs(c->energy);
+                int RES  = temp->energy - c->energy;
                 if (RES < 0)
                 addPrev(c);
                 else 
@@ -259,15 +296,66 @@ class imp_res : public Restaurant
 		
         void PURPLE(){};
 		
-		void REVERSAL(){};
+        void swapNameandEnergy(customer* a, customer* b){
+            string temp_name = a->name;
+            int temp_energy = a->energy;
+            a->name = b->name;
+            a->energy = b->energy;
+            b->name = temp_name;
+            b->energy = temp_energy;
+        }
+
+        void Posreverse(customer* c){
+            customer* a = c;
+            customer* b = c->next;
+            while((a->next != b && b->prev != a) || b != a){
+                if(a->energy < 0 && b->energy > 0){
+                    a = a->prev;
+                }
+                else if(a->energy > 0 && b->energy < 0){
+                    b = b->next;
+                }
+                else if(a->energy > 0 && b->energy > 0){
+                    swapNameandEnergy(a,b);
+                    a = a->prev;
+                    b = b->next;
+                }
+            }
+        }
+
+        void Negreverse(customer* c){
+            customer* a = c;
+            customer* b = c->next;
+            while((a->next != b && b->prev != a) || b != a){
+                if(a->energy < 0 && b->energy > 0){
+                    b = b->next;
+                }
+                else if(a->energy > 0 && b->energy < 0){
+                    a = a->prev;
+                }
+                else if(a->energy < 0 && b->energy < 0){
+                    swapNameandEnergy(a,b);
+                    a = a->prev;
+                    b = b->next;
+                }
+            }
+        }
+
+		void REVERSAL(){
+            if(head->next == nullptr) return;
+            customer* temp = X;
+            Posreverse(temp);
+            Negreverse(temp);
+            delete temp;
+        };
 		
 		void UNLIMITED_VOID(){};
 		
 		void DOMAIN_EXPANSION(){
             if (isEmpty()) return;
-            int soccerer = eating.sumAllEnergy(true) + waiting.sumAllEnergy(true);
+            int sorcerer = eating.sumAllEnergy(true) + waiting.sumAllEnergy(true);
             int curse = eating.sumAllEnergy(false) + waiting.sumAllEnergy(false);
-            if(soccerer >= abs(curse)){
+            if(sorcerer >= abs(curse)){
                 eating.removeAll(false);
                 waiting.removeAll(false);
                 for(int i = 0;i<size;i++){
