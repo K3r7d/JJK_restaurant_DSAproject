@@ -80,7 +80,7 @@ class imp_res : public Restaurant
                 return sum;
             }
 
-            void removebyname(string name) {
+        void removebyname(string name) {
             customer* temp = head;
             if (head == nullptr) {
                 return;
@@ -136,6 +136,52 @@ class imp_res : public Restaurant
                     }
                 }
             }
+
+            void swapNameandEnergy(customer* a, customer* b){
+                string temp_name = a->name;
+                int temp_energy = a->energy;
+                a->name = b->name;
+                a->energy = b->energy;
+                b->name = temp_name;
+                b->energy = temp_energy;
+            }
+
+            void ShellSort(customer* last, int& countofshellsort) {
+                int gap = size / 2;
+                while (gap > 0) {
+                    customer* temp = head;
+                    while (temp != last) {
+                        customer* temp2 = temp;
+                        for (int i = 0; i < gap; i++) {
+                            if (temp2->next == nullptr) break;
+                            temp2 = temp2->next;
+                        }
+                        if (temp->energy > temp2->energy) {
+                            swapNameandEnergy(temp, temp2);
+                            countofshellsort++;
+                        }
+                        temp = temp->next;
+                    }
+                    gap /= 2;
+                }
+            }
+
+
+            int Purple(){
+                if(head == nullptr) return 0;
+                customer* temp = head;
+                int max = INT32_MIN;
+                customer* last = nullptr;
+                while(temp!= nullptr){
+                    if(temp->energy >= max){
+                        max = temp->energy;
+                        last = temp;
+                    }
+                }
+                int countofshellsort = 1;
+                ShellSort(last, countofshellsort);
+                return countofshellsort;
+            }
             
 
     };
@@ -153,6 +199,7 @@ class imp_res : public Restaurant
         eating = Queue();
         waiting = Queue();
     };
+
         void Addnext(customer* cus) {
             cus->next = X->next;
             X->next->prev = cus;
@@ -160,6 +207,8 @@ class imp_res : public Restaurant
             X->next = cus;
             size++;
         }
+
+    
         void changeX(string name){
             customer* temp = head->next;
             for(int i = 0; i < size; i++){
@@ -226,7 +275,15 @@ class imp_res : public Restaurant
             return false;
         }
 
-        
+        int sumofSublist(customer* c,int cap){
+            int sum = 0;
+            customer* temp = c;
+            for(int i = 0;i<cap;i++){
+                sum += temp->energy;
+                temp = temp->next;
+            }
+            return sum;
+        }
 
         void RED(string name, int energy){
             customer* c = new customer(name, energy,nullptr,nullptr);
@@ -293,8 +350,13 @@ class imp_res : public Restaurant
                 RED(temp->name, temp->energy);
             }
         };
-		
-        void PURPLE(){};
+
+
+        void PURPLE(){
+            if (isEmpty()) return;
+            int countofshellsort = waiting.Purple();
+            BLUE(countofshellsort);
+        };
 		
         void swapNameandEnergy(customer* a, customer* b){
             string temp_name = a->name;
@@ -305,56 +367,96 @@ class imp_res : public Restaurant
             b->energy = temp_energy;
         }
 
-        void Posreverse(customer* c){
+        void Posreverse(customer* c) {
             customer* a = c;
             customer* b = c->next;
-            while((a->next != b && b->prev != a) || b != a){
-                if(a->energy < 0 && b->energy > 0){
-                    a = a->prev;
-                }
-                else if(a->energy > 0 && b->energy < 0){
+            
+            do {
+                if(a->energy > 0 && b->energy <0) 
                     b = b->next;
-                }
-                else if(a->energy > 0 && b->energy > 0){
-                    swapNameandEnergy(a,b);
+
+                else if(a->energy < 0 && b->energy > 0)
                     a = a->prev;
+
+                else if (a->energy > 0 && b->energy > 0) {
+                    swapNameandEnergy(a, b);
                     b = b->next;
+                    a = a->prev;
+                } else if (a->energy < 0 && b->energy < 0){
+                    a = a->next;
+                    b = b->prev;
                 }
-            }
+            } while (b != a && b != a->next);
         }
 
-        void Negreverse(customer* c){
+        void Negreverse(customer* c) {
             customer* a = c;
             customer* b = c->next;
-            while((a->next != b && b->prev != a) || b != a){
-                if(a->energy < 0 && b->energy > 0){
+
+            do{
+                if(a->energy > 0 && b->energy <0) 
+                    a = a->prev;
+
+                else if(a->energy < 0 && b->energy > 0)
+                    b = b->next;
+
+                else if (a->energy < 0 && b->energy < 0) {
+                    swapNameandEnergy(a, b);
+                    b = b->next;
+                    a = a->prev;
+                } else if (a->energy > 0 && b->energy > 0){
+                    a = a->prev;
                     b = b->next;
                 }
-                else if(a->energy > 0 && b->energy < 0){
-                    a = a->prev;
-                }
-                else if(a->energy < 0 && b->energy < 0){
-                    swapNameandEnergy(a,b);
-                    a = a->prev;
-                    b = b->next;
-                }
-            }
+            }while(b != a && b != a->next);
         }
+
 
 		void REVERSAL(){
             if(head->next == nullptr) return;
-            customer* temp = X;
-            Posreverse(temp);
-            Negreverse(temp);
-            delete temp;
+            Posreverse(X);
+            Negreverse(X);
+            changeX(eating.getHead()->name);
         };
 		
-		void UNLIMITED_VOID(){};
+		void UNLIMITED_VOID(){
+            cout<<"Unlimited Void"<<endl;
+            if(size<4) return;
+            int length = 4;
+            int min = INT32_MAX;
+            int max_length = 4;
+            customer* StartOfSublist = X;
+            while(length <= size){    
+                customer* temp = X;
+                while(temp->next != X){
+                    int sum = sumofSublist(temp,length);
+                    if(sum < min){
+                        min = sum;
+                        max_length = length;
+                        StartOfSublist = temp;
+                    }
+                    if(sum == min && length > max_length){
+                        max_length = length;
+                        StartOfSublist = temp;
+                    }
+                    temp = temp->next;
+                }
+                length++;
+            }
+            customer* temp = StartOfSublist;
+            for(int i = 0;i<max_length;i++){
+                temp->print();
+                temp = temp->next;
+            }
+        };
 		
 		void DOMAIN_EXPANSION(){
             if (isEmpty()) return;
+            //take sum
             int sorcerer = eating.sumAllEnergy(true) + waiting.sumAllEnergy(true);
             int curse = eating.sumAllEnergy(false) + waiting.sumAllEnergy(false);
+            
+            //check condition
             if(sorcerer >= abs(curse)){
                 eating.removeAll(false);
                 waiting.removeAll(false);
@@ -401,7 +503,7 @@ class imp_res : public Restaurant
                 }
             }
             cout<<"------------------------"<<endl;
-            cout<<"Eating Queue: ";
+            cout<<"Ordered Queue: ";
             eating.print();
             cout<<"X: "<<X->name<<endl;
             cout<<"------------------------"<<endl;
