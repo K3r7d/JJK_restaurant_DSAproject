@@ -60,6 +60,10 @@ class imp_res : public Restaurant
             customer* getHead() const{
                 return head;
             }
+
+            customer* getTail() const{
+                return tail;   
+            }
             int sumAllEnergy(bool positive){
                 customer* temp = head;
                 int sum = 0;
@@ -117,7 +121,8 @@ class imp_res : public Restaurant
             void removeAll(bool positive){
                 if(head == nullptr) return;
                 customer* temp = head;
-                for(int i = 0;i<size;i++){
+                int count = size;
+                for(int i = 0;i<count;i++){
                     if(positive){
                         if(temp->energy > 0){
                             cout<<"Remove "<<temp->name<<endl;
@@ -172,13 +177,14 @@ class imp_res : public Restaurant
                 customer* temp = head;
                 int max = INT32_MIN;
                 customer* last = nullptr;
-                while(temp!= nullptr){
+                for(int i = 0;i<size;i++){
                     if(temp->energy >= max){
                         max = temp->energy;
                         last = temp;
                     }
-                }
-                int countofshellsort = 1;
+                    temp = temp->next;
+                }    
+                int countofshellsort = 0;
                 ShellSort(last, countofshellsort);
                 return countofshellsort;
             }
@@ -317,7 +323,7 @@ class imp_res : public Restaurant
                 for(int i = 0;i<max_index;i++){
                     temp = temp->next;
                 }
-                int RES  = temp->energy - c->energy;
+                int RES  = c->energy - temp->energy;
                 if (RES < 0)
                 addPrev(c);
                 else 
@@ -333,19 +339,22 @@ class imp_res : public Restaurant
                     addPrev(c);
                 }
             }
+            X = c;
             eating.enqueue(c);
         };
 
 		void BLUE(int num){
             if (isEmpty()) return;
-            for(int i = 0; i<size;i++){
+            if (num > size) num = size;
+            for(int i = 0; i<num;i++){
                 customer* temp = eating.dequeue();
                 removebyname(temp->name);
-                if(X ==nullptr){
-                    changeX(eating.getHead()->name);
+                if(X ==nullptr && !eating.isEmpty()){
+                    changeX(eating.getTail()->name);
                 }
             }
-            for(int i = 0; i < waiting.getSize();i++){
+            int count = waiting.getSize();
+            for(int i = 0; i < count;i++){
                 customer* temp = waiting.dequeue();
                 RED(temp->name, temp->energy);
             }
@@ -355,7 +364,7 @@ class imp_res : public Restaurant
         void PURPLE(){
             if (isEmpty()) return;
             int countofshellsort = waiting.Purple();
-            BLUE(countofshellsort);
+            if (countofshellsort) BLUE(countofshellsort);
         };
 		
         void swapNameandEnergy(customer* a, customer* b){
@@ -416,7 +425,7 @@ class imp_res : public Restaurant
             if(head->next == nullptr) return;
             Posreverse(X);
             Negreverse(X);
-            changeX(eating.getHead()->name);
+            changeX(eating.getTail()->name);
         };
 		
 		void UNLIMITED_VOID(){
@@ -460,10 +469,12 @@ class imp_res : public Restaurant
             if(sorcerer >= abs(curse)){
                 eating.removeAll(false);
                 waiting.removeAll(false);
-                for(int i = 0;i<size;i++){
+                int count = size;
+                for(int i = 0;i<count;i++){
                     customer* temp = head->next;
                     if(temp->energy < 0){
-                        removebyname(temp->name);
+                        string name = temp->name;
+                        removebyname(name);
                     }
                     temp = temp->next;
                 }
@@ -474,15 +485,17 @@ class imp_res : public Restaurant
             else{
                 eating.removeAll(true);
                 waiting.removeAll(true);
-                for(int i = 0;i<size;i++){
+                int count = size;
+                for(int i = 0;i<count;i++){
                     customer* temp = head->next;
                     if(temp->energy > 0){
-                        removebyname(temp->name);
+                        string name = temp->name;
+                        removebyname(name);
                     }
                     temp = temp->next;
                 }
                 if(X == nullptr){
-                    changeX(eating.getHead()->name);
+                    changeX(eating.getTail()->name);
                 }
             }
         };
