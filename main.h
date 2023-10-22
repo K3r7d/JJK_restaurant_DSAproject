@@ -4,6 +4,8 @@
 #include <string>
 #include <math.h>
 
+int MAXSIZE;
+
 using namespace std;
 
 class Restaurant {
@@ -28,9 +30,7 @@ class Restaurant {
 			public:
 				customer(){}
 				customer(string na, int e, customer* p, customer *ne): name(na), energy(e), prev(p), next(ne){}
-				~customer(){
-					
-				}
+				~customer(){}
 				void print() {
 					cout << name << "-" << energy << endl;
 				}

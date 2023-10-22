@@ -429,7 +429,6 @@ class imp_res : public Restaurant
         };
 		
 		void UNLIMITED_VOID(){
-            cout<<"Unlimited Void"<<endl;
             if(size<4) return;
             int length = 4;
             int min = INT32_MAX;
@@ -515,13 +514,13 @@ class imp_res : public Restaurant
                     temp->print();
                 }
             }
-            cout<<"------------------------"<<endl;
-            cout<<"Ordered Queue: ";
-            eating.print();
-            cout<<"X: "<<X->name<<endl;
-            cout<<"------------------------"<<endl;
-            cout<<"Waiting Queue: ";
-            waiting.print();
+            // cout<<"------------------------"<<endl;
+            // cout<<"Ordered Queue: ";
+            // eating.print();
+            // cout<<"X: "<<X->name<<endl;
+            // cout<<"------------------------"<<endl;
+            // cout<<"Waiting Queue: ";
+            // waiting.print();
         }
 
 };
