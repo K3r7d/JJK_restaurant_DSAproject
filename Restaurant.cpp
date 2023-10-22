@@ -1,6 +1,6 @@
 #include "main.h"
 
-extern int MAXSIZE;
+// extern int MAXSIZE;
 
 
 class imp_res : public Restaurant
@@ -86,61 +86,47 @@ class imp_res : public Restaurant
 
         void removebyname(string name) {
             customer* temp = head;
-            if (head == nullptr) {
-                return;
-            }
-            else {
-                for (int i = 0; i < size; i++) {
-                    if (temp->name == name) {
-                        if(temp == head){
-                            head = temp->next;
+            customer* prev = nullptr;
 
-
-                        }
-                        if(temp == tail){
-                            tail = temp->prev;
-                        }
-                        if(temp->next != nullptr){
-                            temp->next->prev = temp->prev;
-                        }
-                        if(temp->prev != nullptr){
-                            temp->prev->next = temp->next;
-                        }
-                        temp->next = nullptr;
-                        temp->prev = nullptr;
-                        delete temp;
-                        size--;
-                        return;
+            while (temp != nullptr) {
+                if (temp->name == name) {
+                    if (temp == head) {
+                        head = temp->next;
                     }
-                    temp = temp->next;
+                    if (temp == tail) {
+                        tail = prev;
+                    }
+                    if (prev != nullptr) {
+                        prev->next = temp->next;
+                    }
+                    if (temp->next != nullptr) {
+                        temp->next->prev = prev;
+                    }
+                    delete temp;
+                    size--;
+                    return;
                 }
+                prev = temp;
+                temp = temp->next;
             }
         }
-            
 
-            void removeAll(bool positive){
-                if(head == nullptr) return;
-                customer* temp = head;
-                int count = size;
-                for(int i = 0;i<count;i++){
-                    if(positive){
-                        if(temp->energy > 0){
-                            cout<<"Remove "<<temp->name<<endl;
-                            string name = temp->name;
-                            temp = temp->next;
-                            removebyname(name);
-                        }
-                    }
-                    else{
-                        if(temp->energy < 0){
-                            cout<<"Remove "<<temp->name<<endl;
-                            string name = temp->name;
-                            temp = temp->next;
-                            removebyname(name);
-                        }
-                    }
+        void removeAll(bool positive) {
+            if (head == nullptr) return;
+
+            customer* temp = head;
+            customer* next = nullptr;
+
+            while (temp != nullptr) {
+                next = temp->next;
+                if ((positive && temp->energy > 0) || (!positive && temp->energy < 0)) {
+                    cout << "Remove " << temp->name << endl;
+                    removebyname(temp->name);
                 }
+                temp = next;
             }
+        }
+
 
             void swapNameandEnergy(customer* a, customer* b){
                 string temp_name = a->name;
@@ -247,7 +233,7 @@ class imp_res : public Restaurant
                             head->next = temp->next;
                         }
                         if(temp == X){
-                            X = nullptr;
+                            X = X->energy >= 0 ? X->next : X->prev;
                         }
                         temp->prev->next = temp->next;
                         temp->next->prev = temp->prev;
@@ -349,9 +335,9 @@ class imp_res : public Restaurant
             for(int i = 0; i<num;i++){
                 customer* temp = eating.dequeue();
                 removebyname(temp->name);
-                if(X ==nullptr && !eating.isEmpty()){
-                    changeX(eating.getTail()->name);
-                }
+                // if(X ==nullptr && !eating.isEmpty()){
+                //     changeX(eating.getTail()->name);
+                // }
             }
             int count = waiting.getSize();
             for(int i = 0; i < count;i++){
@@ -477,9 +463,9 @@ class imp_res : public Restaurant
                     }
                     temp = temp->next;
                 }
-                if(X == nullptr){
-                    changeX(eating.getHead()->name);
-                }
+                // if(X == nullptr){
+                //     changeX(eating.getHead()->name);
+                // }
             }
             else{
                 eating.removeAll(true);
@@ -493,34 +479,36 @@ class imp_res : public Restaurant
                     }
                     temp = temp->next;
                 }
-                if(X == nullptr){
-                    changeX(eating.getTail()->name);
-                }
+                // if(X == nullptr){
+                //     changeX(eating.getTail()->name);
+                // }
             }
         };
 		
 		void LIGHT(int num) {
             if (isEmpty()) return;
-            customer* temp = X;
-            if (num > 0) {
-                for (int i = 0; i < size; i++) {
-                    temp->print();
-                    temp = temp->next;
-                }
-            }
-            else {
-                for (int i = 0; i < size; i++) {
-                    temp = temp->prev;
-                    temp->print();
-                }
-            }
-            // cout<<"------------------------"<<endl;
-            // cout<<"Ordered Queue: ";
-            // eating.print();
-            // cout<<"X: "<<X->name<<endl;
-            // cout<<"------------------------"<<endl;
-            // cout<<"Waiting Queue: ";
-            // waiting.print();
+            // customer* temp = X;
+            // if (num > 0) {
+            //     for (int i = 0; i < size; i++) {
+            //         temp->print();
+            //         temp = temp->next;
+            //     }
+            // }
+            // else {
+            //     for (int i = 0; i < size; i++) {
+            //         temp = temp->prev;
+            //         temp->print();
+            //     }
+            // }
+
+            //DEBUGGGGG
+            cout<<"------------------------"<<endl;
+            cout<<"Ordered Queue: ";
+            eating.print();
+            cout<<"X: "<<X->name<<endl;
+            cout<<"------------------------"<<endl;
+            cout<<"Waiting Queue: ";
+            waiting.print();
         }
 
 };
