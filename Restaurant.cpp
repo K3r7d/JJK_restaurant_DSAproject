@@ -3,6 +3,7 @@
 // extern int MAXSIZE;
 
 
+
 class imp_res : public Restaurant
 {
     class Queue{
@@ -120,7 +121,22 @@ class imp_res : public Restaurant
             while (temp != nullptr) {
                 next = temp->next;
                 if ((positive && temp->energy > 0) || (!positive && temp->energy < 0)) {
-                    cout << "Remove " << temp->name << endl;
+                    temp->print();
+                    removebyname(temp->name);
+                }
+                temp = next;
+            }
+        }
+
+        void removeAllnotCout(bool positive) {
+            if (head == nullptr) return;
+
+            customer* temp = head;
+            customer* next = nullptr;
+
+            while (temp != nullptr) {
+                next = temp->next;
+                if ((positive && temp->energy > 0) || (!positive && temp->energy < 0)) {
                     removebyname(temp->name);
                 }
                 temp = next;
@@ -137,23 +153,46 @@ class imp_res : public Restaurant
                 b->energy = temp_energy;
             }
 
-            void ShellSort(customer* last, int& countofshellsort) {
-                int gap = size / 2;
-                while (gap > 0) {
-                    customer* temp = head;
-                    while (temp != last) {
-                        customer* temp2 = temp;
-                        for (int i = 0; i < gap; i++) {
-                            if (temp2->next == nullptr) break;
-                            temp2 = temp2->next;
-                        }
-                        if (temp->energy > temp2->energy) {
-                            swapNameandEnergy(temp, temp2);
-                            countofshellsort++;
-                        }
-                        temp = temp->next;
+            bool isSmaller(int idx1, int idx2){
+                customer* temp = head;
+                for(int i = 0;i<idx1;i++){
+                    temp = temp->next;
+                }
+                customer* temp2 = head;
+                for(int i = 0;i<idx2;i++){
+                    temp2 = temp2->next;
+                }
+                return abs(temp->energy) < abs(temp2->energy);
+            }     
+
+            void swapatIndex(int a,int b){
+                customer* temp = head;
+                for(int i = 0;i<a;i++){
+                    temp = temp->next;
+                }
+                customer* temp2 = head;
+                for(int i = 0;i<b;i++){
+                    temp2 = temp2->next;
+                }
+                swapNameandEnergy(temp, temp2);
+            }       
+
+            void ShellSort(int n, int& countofshellsort) {
+                customer * temp = head;
+                for(int i = n/2;i>2;i/=2){
+                    for(int j = 0;j<i;j++){
+                        inssort2(countofshellsort, n-j, i);
                     }
-                    gap /= 2;
+                }
+                inssort2(countofshellsort, n, 1);
+            }
+
+            void inssort2(int& countofshellsort, int n, int incr) {
+                for(int i = incr;i<n;i+=incr){
+                    for(int j = i;j>= incr && isSmaller(j-incr,j);j-=incr){
+                        swapatIndex(j-incr,j);
+                        countofshellsort++;
+                    }
                 }
             }
 
@@ -163,16 +202,29 @@ class imp_res : public Restaurant
                 customer* temp = head;
                 int max = INT32_MIN;
                 customer* last = nullptr;
+                int n = 0;
                 for(int i = 0;i<size;i++){
-                    if(temp->energy >= max){
-                        max = temp->energy;
+                    if(abs(temp->energy) >= max){
+                        max = abs(temp->energy);
                         last = temp;
+                        n = i+1; 
                     }
                     temp = temp->next;
                 }    
                 int countofshellsort = 0;
-                ShellSort(last, countofshellsort);
+                ShellSort(n, countofshellsort);
                 return countofshellsort;
+            }
+
+            bool isInQueue(customer* c){
+                customer* temp = head;
+                for(int i = 0;i<size;i++){
+                    if(temp->name == c->name){
+                        return true;
+                    }
+                    temp = temp->next;
+                }
+                return false;
             }
             
 
@@ -183,6 +235,7 @@ class imp_res : public Restaurant
         customer* X;
         Queue eating;
         Queue waiting;
+        Queue order;
     public:
     imp_res(){
         head = new customer("head", 0, nullptr, nullptr);
@@ -190,6 +243,7 @@ class imp_res : public Restaurant
         X = nullptr;
         eating = Queue();
         waiting = Queue();
+        order = Queue();
     };
 
         void Addnext(customer* cus) {
@@ -232,9 +286,7 @@ class imp_res : public Restaurant
                         if(temp == head->next){
                             head->next = temp->next;
                         }
-                        if(temp == X){
-                            X = X->energy >= 0 ? X->next : X->prev;
-                        }
+                        X = temp->energy > 0 ? temp->next : temp->prev;
                         temp->prev->next = temp->next;
                         temp->next->prev = temp->prev;
                         temp->next = nullptr;
@@ -277,9 +329,35 @@ class imp_res : public Restaurant
             return sum;
         }
 
+        void insert(customer* c){
+            customer* temp = new customer(c->name, c->energy, nullptr, nullptr);
+            if(head->next == nullptr){
+                head->next = temp;
+                temp->next = temp;
+                temp->prev = temp;
+                size++;
+            }
+            else{
+                temp->next = head->next;
+                temp->prev = head->next->prev;
+                head->next->prev->next = temp;
+                head->next->prev = temp;
+                size++;
+            }
+        }
+
+        void inserttoorder(customer* c){
+            if(order.isInQueue(c))return;
+            else{
+                order.enqueue(c);
+                return;
+            }
+        }
+
         void RED(string name, int energy){
             customer* c = new customer(name, energy,nullptr,nullptr);
             if(isInList(name)|| energy == 0||(isFull() && waiting.isFull())) return;
+            inserttoorder(c);
             if(isFull()){
             waiting.enqueue(c);
             return;    
@@ -290,11 +368,10 @@ class imp_res : public Restaurant
                 X = c;
                 head->next = c;
                 size++;
-                eating.enqueue(c);
                 return;
             }
             if(size>=MAXSIZE/2){
-                customer* temp = head->next;
+                customer* temp = X;
                 int max = INT32_MIN;
                 int max_index = 0;
                 for(int i = 0;i<size;i++){
@@ -305,11 +382,12 @@ class imp_res : public Restaurant
                     }
                     temp = temp->next;
                 }
-                temp = head->next;
+                temp = X;
                 for(int i = 0;i<max_index;i++){
                     temp = temp->next;
                 }
                 int RES  = c->energy - temp->energy;
+                X = temp;
                 if (RES < 0)
                 addPrev(c);
                 else 
@@ -326,18 +404,16 @@ class imp_res : public Restaurant
                 }
             }
             X = c;
-            eating.enqueue(c);
         };
 
 		void BLUE(int num){
             if (isEmpty()) return;
             if (num > size) num = size;
             for(int i = 0; i<num;i++){
-                customer* temp = eating.dequeue();
+                customer* temp = order.dequeue();
+                cout<<"remove "<<temp->name<<endl;
                 removebyname(temp->name);
-                // if(X ==nullptr && !eating.isEmpty()){
-                //     changeX(eating.getTail()->name);
-                // }
+                
             }
             int count = waiting.getSize();
             for(int i = 0; i < count;i++){
@@ -409,10 +485,12 @@ class imp_res : public Restaurant
 
 		void REVERSAL(){
             if(head->next == nullptr) return;
+            customer* temp = X;
             Posreverse(X);
             Negreverse(X);
-            changeX(eating.getTail()->name);
+            changeX(temp->name);
         };
+
 		
 		void UNLIMITED_VOID(){
             if(size<4) return;
@@ -438,7 +516,25 @@ class imp_res : public Restaurant
                 length++;
             }
             customer* temp = StartOfSublist;
+            min = INT32_MAX;
+            customer* min_node = nullptr;
+            int min_idx = 0;
             for(int i = 0;i<max_length;i++){
+                if(temp->energy < min){
+                    min = temp->energy;
+                    min_idx = i;
+                    min_node = temp;
+                }
+                temp = temp->next;
+            }
+
+            temp = min_node;
+            for(int i = min_idx;i<max_length;i++){
+                temp->print();
+                temp = temp->next;
+            }
+            temp = StartOfSublist;
+            for(int i = 0;i<min_idx;i++){
                 temp->print();
                 temp = temp->next;
             }
@@ -447,13 +543,13 @@ class imp_res : public Restaurant
 		void DOMAIN_EXPANSION(){
             if (isEmpty()) return;
             //take sum
-            int sorcerer = eating.sumAllEnergy(true) + waiting.sumAllEnergy(true);
-            int curse = eating.sumAllEnergy(false) + waiting.sumAllEnergy(false);
+            int sorcerer = order.sumAllEnergy(true);
+            int curse = order.sumAllEnergy(false);
             
             //check condition
             if(sorcerer >= abs(curse)){
-                eating.removeAll(false);
-                waiting.removeAll(false);
+                waiting.removeAllnotCout(false);
+                order.removeAll(false);
                 int count = size;
                 for(int i = 0;i<count;i++){
                     customer* temp = head->next;
@@ -463,13 +559,11 @@ class imp_res : public Restaurant
                     }
                     temp = temp->next;
                 }
-                // if(X == nullptr){
-                //     changeX(eating.getHead()->name);
-                // }
+
             }
             else{
-                eating.removeAll(true);
-                waiting.removeAll(true);
+                waiting.removeAllnotCout(true);
+                order.removeAll(true);
                 int count = size;
                 for(int i = 0;i<count;i++){
                     customer* temp = head->next;
@@ -479,32 +573,33 @@ class imp_res : public Restaurant
                     }
                     temp = temp->next;
                 }
-                // if(X == nullptr){
-                //     changeX(eating.getTail()->name);
-                // }
+            }
+            while(!waiting.isEmpty() && !isFull()){
+                customer* temp = waiting.dequeue();
+                RED(temp->name, temp->energy);
             }
         };
 		
 		void LIGHT(int num) {
             if (isEmpty()) return;
-            // customer* temp = X;
-            // if (num > 0) {
-            //     for (int i = 0; i < size; i++) {
-            //         temp->print();
-            //         temp = temp->next;
-            //     }
-            // }
-            // else {
-            //     for (int i = 0; i < size; i++) {
-            //         temp = temp->prev;
-            //         temp->print();
-            //     }
-            // }
+            customer* temp = X;
+            if (num > 0) {
+                for (int i = 0; i < size; i++) {
+                    temp->print();
+                    temp = temp->next;
+                }
+            }
+            else {
+                for (int i = 0; i < size; i++) {
+                    temp->print();
+                    temp = temp->prev;
+                }
+            }
 
             //DEBUGGGGG
             cout<<"------------------------"<<endl;
             cout<<"Ordered Queue: ";
-            eating.print();
+            order.print();
             cout<<"X: "<<X->name<<endl;
             cout<<"------------------------"<<endl;
             cout<<"Waiting Queue: ";
