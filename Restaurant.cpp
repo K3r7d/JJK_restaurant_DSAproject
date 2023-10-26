@@ -14,6 +14,17 @@ class imp_res : public Restaurant
         public:
             Queue(){head = nullptr; tail = nullptr; size = 0;}
             
+            ~Queue(){
+                customer* temp = head;
+                while(temp != nullptr){
+                    customer* next = temp->next;
+                    delete temp;
+                    temp = next;
+                }
+                head = nullptr;
+                tail = nullptr;
+                size = 0;
+            }
 
             void enqueue(customer* c){
                 customer* temp = new customer(c->name, c->energy, nullptr, nullptr);
@@ -241,22 +252,38 @@ class imp_res : public Restaurant
             
 
     };
-    private:
-        customer* head;
-        int size;
-        customer* X;
-        Queue eating;
-        Queue waiting;
-        Queue order;
-    public:
-    imp_res(){
-        head = new customer("head", 0, nullptr, nullptr);
-        size = 0;
-        X = nullptr;
-        eating = Queue();
-        waiting = Queue();
-        order = Queue();
-    };
+        private:
+            customer* head;
+            int size;
+            customer* X;
+            Queue eating;
+            Queue waiting;
+            Queue order;
+
+        public:
+        imp_res(){
+            head = new customer("head", 0, nullptr, nullptr);
+            size = 0;
+            X = nullptr;
+        }
+
+        ~imp_res(){
+            free();
+            head = nullptr;
+            X = nullptr;
+            size = 0; 
+        }
+
+        void free(){
+            customer* temp = head->next;
+            for(int i = 0;i<size;i++){
+                customer* next = temp->next;
+                delete temp;
+                temp = next;
+            }
+            head->next = nullptr;
+        }
+
 
         void Addnext(customer* cus) {
             cus->next = X->next;
