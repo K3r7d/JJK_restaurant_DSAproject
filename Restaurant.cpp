@@ -24,6 +24,7 @@ class imp_res : public Restaurant
                 }
                 else{
                     tail->next = temp;
+                    temp->prev = tail;
                     tail = temp;
                     size++;
                 }
@@ -35,10 +36,13 @@ class imp_res : public Restaurant
                 else{
                     customer* temp = head;
                     head = head->next;
+                    temp->next = nullptr;
                     size--;
                     return temp;
                 }
             }
+
+
             bool isEmpty(){
                 return size == 0;
             }
@@ -46,14 +50,20 @@ class imp_res : public Restaurant
                 return size == MAXSIZE;
             }
             void print(){
+                //debug
+                // customer* temp = head;
+                // cout<<"[ ";
+                // cout<<"head-> ";
+                // while(temp != nullptr){
+                //     cout<<temp->name<<":"<<temp->energy<<" -> ";
+                //     temp = temp->next;
+                // }
+                // cout<<"tail ]"<<endl;
                 customer* temp = head;
-                cout<<"[ ";
-                cout<<"head-> ";
-                while(temp != nullptr){
-                    cout<<temp->name<<":"<<temp->energy<<" -> ";
+                for(int i = 0;i<size;i++){
+                    temp->print();
                     temp = temp->next;
                 }
-                cout<<"tail ]"<<endl;
             }
             int getSize() const{
                 return size;
@@ -112,14 +122,16 @@ class imp_res : public Restaurant
             }
         }
 
-        void removeAll(bool positive) {
-            if (head == nullptr) return;
+        
 
-            customer* temp = head;
+        void removeAll(bool positive) {
+            if (tail == nullptr) return;
+
+            customer* temp = tail;
             customer* next = nullptr;
 
             while (temp != nullptr) {
-                next = temp->next;
+                next = temp->prev;
                 if ((positive && temp->energy > 0) || (!positive && temp->energy < 0)) {
                     temp->print();
                     removebyname(temp->name);
@@ -129,13 +141,13 @@ class imp_res : public Restaurant
         }
 
         void removeAllnotCout(bool positive) {
-            if (head == nullptr) return;
+            if (tail == nullptr) return;
 
-            customer* temp = head;
+            customer* temp = tail;
             customer* next = nullptr;
 
             while (temp != nullptr) {
-                next = temp->next;
+                next = temp->prev;
                 if ((positive && temp->energy > 0) || (!positive && temp->energy < 0)) {
                     removebyname(temp->name);
                 }
@@ -411,7 +423,7 @@ class imp_res : public Restaurant
             if (num > size) num = size;
             for(int i = 0; i<num;i++){
                 customer* temp = order.dequeue();
-                cout<<"remove "<<temp->name<<endl;
+                // cout<<"remove "<<temp->name<<endl;
                 removebyname(temp->name);
                 
             }
@@ -426,7 +438,7 @@ class imp_res : public Restaurant
         void PURPLE(){
             if (isEmpty()) return;
             int countofshellsort = waiting.Purple();
-            if (countofshellsort) BLUE(countofshellsort);
+            if (countofshellsort) BLUE(countofshellsort % MAXSIZE);
         };
 		
         void swapNameandEnergy(customer* a, customer* b){
@@ -485,10 +497,10 @@ class imp_res : public Restaurant
 
 		void REVERSAL(){
             if(head->next == nullptr) return;
-            customer* temp = X;
+            string name = X->name;
             Posreverse(X);
             Negreverse(X);
-            changeX(temp->name);
+            changeX(name);
         };
 
 		
@@ -541,6 +553,7 @@ class imp_res : public Restaurant
         };
 		
 		void DOMAIN_EXPANSION(){
+            if(size<2) return;
             if (isEmpty()) return;
             //take sum
             int sorcerer = order.sumAllEnergy(true);
@@ -551,13 +564,14 @@ class imp_res : public Restaurant
                 waiting.removeAllnotCout(false);
                 order.removeAll(false);
                 int count = size;
+                customer* temp = X;
                 for(int i = 0;i<count;i++){
-                    customer* temp = head->next;
+                    customer* next = temp->next;
                     if(temp->energy < 0){
                         string name = temp->name;
                         removebyname(name);
                     }
-                    temp = temp->next;
+                    temp = next;
                 }
 
             }
@@ -565,13 +579,14 @@ class imp_res : public Restaurant
                 waiting.removeAllnotCout(true);
                 order.removeAll(true);
                 int count = size;
+                customer* temp = X;
                 for(int i = 0;i<count;i++){
-                    customer* temp = head->next;
+                    customer* next = temp->next;
                     if(temp->energy > 0){
                         string name = temp->name;
                         removebyname(name);
                     }
-                    temp = temp->next;
+                    temp = next;
                 }
             }
             while(!waiting.isEmpty() && !isFull()){
@@ -589,21 +604,24 @@ class imp_res : public Restaurant
                     temp = temp->next;
                 }
             }
-            else {
+            else if(num < 0) {
                 for (int i = 0; i < size; i++) {
                     temp->print();
                     temp = temp->prev;
                 }
             }
+            else {
+                waiting.print();
+            }
 
-            //DEBUGGGGG
-            cout<<"------------------------"<<endl;
-            cout<<"Ordered Queue: ";
-            order.print();
-            cout<<"X: "<<X->name<<endl;
-            cout<<"------------------------"<<endl;
-            cout<<"Waiting Queue: ";
-            waiting.print();
+            // //DEBUGGGGG
+            // cout<<"------------------------"<<endl;
+            // cout<<"Ordered Queue: ";
+            // order.print();
+            // cout<<"X: "<<X->name<<endl;
+            // cout<<"------------------------"<<endl;
+            // cout<<"Waiting Queue: ";
+            // waiting.print();
         }
 
 };
