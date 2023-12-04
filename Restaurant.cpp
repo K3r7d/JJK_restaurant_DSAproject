@@ -249,7 +249,6 @@ class imp_res : public Restaurant
                 }
                 return false;
             }
-            
 
     };
         private:
@@ -358,6 +357,7 @@ class imp_res : public Restaurant
             return false;
         }
 
+<<<<<<< Updated upstream
         int sumofSublist(customer* c,int cap){
             int sum = 0;
             customer* temp = c;
@@ -391,6 +391,56 @@ class imp_res : public Restaurant
                 order.enqueue(c);
                 return;
             }
+=======
+        void print(){
+            customer* temp = head->next;
+            cout<<"[ ";
+            cout<<"head-> ";
+            while(temp != nullptr){
+                cout<<temp->name<<":"<<temp->energy<<" -> ";
+                temp = temp->next;
+            }
+            cout<<"tail ]"<<endl;
+        }
+
+        void swap(customer* c1, customer* c2){
+            customer* temp = new customer(c1->name, c1->energy, nullptr, nullptr);
+            c1->name = c2->name;
+            c1->energy = c2->energy;
+            c2->name = temp->name;
+            c2->energy = temp->energy;
+            delete temp;
+        }
+
+        void positiveSwap(){
+            if(isEmpty()) return;
+            customer* t1 = X;
+            customer* t2 = X->next;
+            while(!(t1->energy > 0 && t2->energy > 0)){
+                if(t1->energy < 0){
+                    t1 = t1->prev;
+                }
+                if(t2->energy < 0){
+                    t2 = t2->next;
+                }
+            }    
+            swap(t1, t2);
+        }
+
+        void negativeSwap(){
+            if(isEmpty()) return;
+            customer* t1 = X;
+            customer* t2 = X->prev;
+            while(!(t1->energy < 0 && t2->energy < 0)){
+                if(t1->energy > 0){
+                    t1 = t1->next;
+                }
+                if(t2->energy > 0){
+                    t2 = t2->prev;
+                }
+            }    
+            swap(t1, t2);
+>>>>>>> Stashed changes
         }
 
         void RED(string name, int energy){
@@ -531,6 +581,7 @@ class imp_res : public Restaurant
         };
 
 		
+<<<<<<< Updated upstream
 		void UNLIMITED_VOID(){
             if(size<4) return;
             int length = 4;
@@ -578,6 +629,14 @@ class imp_res : public Restaurant
                 temp = temp->next;
             }
         };
+=======
+		void REVERSAL(){
+            positiveSwap();
+            negativeSwap();
+        };
+		
+		void UNLIMITED_VOID(){};
+>>>>>>> Stashed changes
 		
 		void DOMAIN_EXPANSION(){
             if(size<2) return;
